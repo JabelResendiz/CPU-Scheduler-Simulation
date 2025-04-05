@@ -2,9 +2,10 @@ import heapq
 from basic_struct import Process,Event
 from scheduling import Scheduling
 
-class FCFS(Scheduling):
+class SJF(Scheduling):
     def __init__(self):
         super().__init__()
+        self.ready_queue = []
 
     def add_process(self, process: Process):
 
@@ -45,9 +46,9 @@ class FCFS(Scheduling):
             heapq.heappush(self.ready_queue, (event.process.burst_time, event.process))
         elif event.event_type == 'COMPLETION':
             self.handle_completion(event.process)
-        
+    
     def handle_arrival(self, process: Process):
-
+        return super().handle_arrival(process)
         
     def handle_completion(self, process: Process):
         self.completed_processes.append(process)
