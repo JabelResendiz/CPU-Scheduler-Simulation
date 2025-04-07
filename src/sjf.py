@@ -32,7 +32,7 @@ class SJF(Scheduling):
 
     def execute_next(self):
         if self.ready_queue:
-            _,process = heapq.heappop(self.ready_queue)
+            _, _, process = heapq.heappop(self.ready_queue)
             process.start_time = self.current_time
             process.end_time = self.current_time+ process.burst_time
             process.waiting_time = process.start_time - process.arrival_time
@@ -43,7 +43,7 @@ class SJF(Scheduling):
 
     def process_event(self, event: Event):
         if event.event_type == 'ARRIVAL':
-            heapq.heappush(self.ready_queue, (event.process.burst_time, event.process))
+            heapq.heappush(self.ready_queue, (event.process.burst_time, event.process.arrival_time, event.process))
         elif event.event_type == 'COMPLETION':
             self.handle_completion(event.process)
     

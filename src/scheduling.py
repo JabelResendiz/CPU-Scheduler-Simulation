@@ -14,7 +14,10 @@ class Scheduling:
         raise NotImplementedError("Subclasess must implement this method")
     
     def process_event(self,event: Event):
-        raise NotImplementedError()
+        if event.event_type == 'ARRIVAL':
+            self.handle_arrival(event.process)
+        elif event.event_type == 'COMPLETION':
+            self.handle_completion(event.process)
     
     def handle_arrival(self,process:Process):
         raise NotImplementedError()

@@ -8,7 +8,8 @@ class Process:
         self.end_time = None                # Time when the process finishes executing (to be set later)
         self.waiting_time = None            # Time the process waits before starting execution
         self.turnaround_time = None         # Total time from arrival to completion
-
+        self.remaining_time = burst_time
+        
 class Event:
     def __init__(self, time, event_type, process):
         self.time = time                    # Time when this event occurs
