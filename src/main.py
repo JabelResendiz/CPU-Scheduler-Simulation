@@ -2,6 +2,9 @@ from basic_struct import Process
 from fcfs import FCFS
 from sjf import SJF
 from roundRobin import RoundRobin
+from srtf import SRTF
+from mlfq import MLFQScheduler
+
 
 if __name__ =="__main__":
     
@@ -54,23 +57,67 @@ if __name__ =="__main__":
 
 
 
+    # processes = [
+    #     Process("P1", 0, 6),  
+    #     Process("P2", 1, 8),
+    #     Process("P3", 2, 7),
+    #     Process("P4", 3, 3),
+    #     Process("P5", 8, 10),
+    # ]
+
+
+    # round_scheduler = RoundRobin(3)
+
+    # for process in processes:
+    #     round_scheduler.add_process(process)
+    
+    # round_scheduler.run()
+
+    # print("Execution Results ():")
+    # for process in round_scheduler.completed_processes:
+    #     print(f"Process {process.pid}: Start = {process.start_time}, End = {process.end_time}, Arrival = {process.arrival_time}, Burst = {process.burst_time}")
+    #     print(f"  -> Waiting Time: {process.waiting_time}, Turnaround Time: {process.turnaround_time}\n")
+
+    # processes = [
+    #     Process("P1", 0, 6),  
+    #     Process("P2", 1, 8),
+    #     Process("P3", 2, 7),
+    #     Process("P4", 3, 3),
+    #     Process("P5", 8, 10),
+    # ]
+
+
+    # srtf_scheduler = SRTF()
+
+    # for process in processes:
+    #     srtf_scheduler.add_process(process)
+    
+    # srtf_scheduler.run()
+
+    # print("Execution Results ():")
+    # for process in srtf_scheduler.completed_processes:
+    #     print(f"Process {process.pid}: Start = {process.start_time}, End = {process.end_time}, Arrival = {process.arrival_time}, Burst = {process.burst_time}")
+    #     print(f"  -> Waiting Time: {process.waiting_time}, Turnaround Time: {process.turnaround_time}\n")
+
+
     processes = [
-        Process("P1", 0, 6),  
+        Process("P1", 0, 6),
         Process("P2", 1, 8),
         Process("P3", 2, 7),
         Process("P4", 3, 3),
         Process("P5", 8, 10),
     ]
 
+    scheduler = MLFQScheduler(quantums=[4, 8, 12])
+    for p in processes:
+        scheduler.add_process(p)
 
-    round_scheduler = RoundRobin(3)
-
-    for process in processes:
-        round_scheduler.add_process(process)
-    
-    round_scheduler.run()
+    scheduler.run()
 
     print("Execution Results ():")
-    for process in round_scheduler.completed_processes:
-        print(f"Process {process.pid}: Start = {process.start_time}, End = {process.end_time}, Arrival = {process.arrival_time}, Burst = {process.burst_time}")
-        print(f"  -> Waiting Time: {process.waiting_time}, Turnaround Time: {process.turnaround_time}\n")
+    for p in scheduler.completed_processes:
+        print(f"Process {p.pid}: Start = {p.start_time}, End = {p.end_time}, Arrival = {p.arrival_time}, Burst = {p.burst_time}")
+        print(f"  -> Waiting Time: {p.waiting_time}, Turnaround Time: {p.turnaround_time}")
+
+
+

@@ -1,4 +1,3 @@
-import heapq
 from  basic_struct import Process,Event
 
 class Scheduling:
@@ -14,16 +13,13 @@ class Scheduling:
         raise NotImplementedError("Subclasess must implement this method")
     
     def process_event(self,event: Event):
-        if event.event_type == 'ARRIVAL':
-            self.handle_arrival(event.process)
-        elif event.event_type == 'COMPLETION':
-            self.handle_completion(event.process)
+        raise NotImplementedError("Subclasses must implement this method")
     
     def handle_arrival(self,process:Process):
-        raise NotImplementedError()
+        raise NotImplementedError("Subclasses must implement this method")
     
     def handle_completion(self,process:Process):
-        raise NotImplementedError()
+        raise NotImplementedError("Subclasses must implement this method")
     
     def run(self):
         raise NotImplementedError("Subclasses must implement this method")
