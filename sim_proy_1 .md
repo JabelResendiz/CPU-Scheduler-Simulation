@@ -1,5 +1,4 @@
-
-# Proyecto: Simulación de Eventos Discretos
+# ![1744225081172](image/sim_proy_1/1744225081172.png)Proyecto: Simulación de Eventos Discretos
 
 Este proyecto tiene como objetivo desarrollar una simulación de eventos discretos para analizar y entender mejor ciertos fenómenos. A través de este trabajo, buscamos aplicar los principios de la simulación de eventos discretos para modelar y experimentar con estos fenómenos, y obtener resultados que nos ayuden a tomar decisiones informadas.
 
@@ -30,6 +29,7 @@ El informe del proyecto debe ser autocontenido y debe proporcionar una descripci
 - Análisis de parada de la simulación
 
 ## S4 Modelo Matemático
+
 - Descripción del modelo de como modelos probabilísticos.
 - Supuestos y restricciones
 - Comparación de los resultados obtenidos con los resultados experimentales.

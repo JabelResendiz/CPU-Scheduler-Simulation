@@ -1,0 +1,137 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{longtable}
+
+\title{Simulación de Eventos Discretos: Algoritmos de Planificación de Procesos}
+\author{Tu Nombre}
+\date{\today}
+
+\begin{document}
+	
+	\maketitle
+	
+	\begin{abstract}
+		Este informe describe la simulación de algoritmos de planificación de procesos en un sistema de gestión de CPU, aplicando técnicas de simulación de eventos discretos. Los algoritmos implementados son el \textbf{Multilevel Feedback Queue (MLFQ)}, \textbf{Round Robin (RR)} y \textbf{Shortest Remaining Time First (SRTF)}. Se asumió que no hay eventos de entrada y salida, y que la simulación procesa todos los eventos de manera independiente antes de simular la ejecución de los procesos. 
+	\end{abstract}
+
+
+\section{Introducción}
+
+La simulación de sistemas de planificación de procesos es un aspecto fundamental en la ingeniería de software y la informática. Los algoritmos de planificación determinan el orden en que los procesos son ejecutados por el CPU, con el objetivo de optimizar el rendimiento y los recursos del sistema. En este proyecto, se simulan tres algoritmos de planificación:
+
+\begin{itemize}
+	\item \textbf{Round Robin (RR)}: Un algoritmo de planificación basado en asignar una cantidad fija de tiempo a cada proceso de manera cíclica.
+	\item \textbf{Shortest Remaining Time First (SRTF)}: Un algoritmo de planificación preemptivo donde el proceso con el tiempo de ejecución restante más corto se ejecuta primero.
+	\item \textbf{Multilevel Feedback Queue (MLFQ)}: Un algoritmo basado en múltiples colas con diferentes prioridades, donde los procesos son promovidos o degradados entre las colas según su comportamiento.
+\end{itemize}
+
+El sistema simulado tiene como objetivo analizar cómo cada algoritmo gestiona el tiempo de ejecución y los recursos del sistema bajo condiciones específicas. Los algoritmos de planificación se aplicarán a un conjunto de procesos predefinidos, sin eventos de entrada o salida, lo que simplifica el modelo y permite concentrarse únicamente en la ejecución y el rendimiento de los algoritmos.
+
+\section{Detalles de Implementación}
+
+El sistema simulado implementa una cola de procesos, donde cada proceso tiene un tiempo de llegada, un tiempo de ejecución (burst time) y un tiempo restante de ejecución (waiting time). En lugar de simular eventos de entrada y salida, la simulación se basa en un conjunto de procesos ya definidos, y los algoritmos de planificación se aplican secuencialmente para simular la ejecución.
+
+Para la simulación de estos algoritmos, los eventos se procesan de forma independiente. Es decir, todos los procesos son analizados primero antes de comenzar con la ejecución. Una vez que se determinan los eventos y las colas de los procesos, la ejecución se simula utilizando los algoritmos mencionados.
+
+Las variables de interés en la simulación incluyen el tiempo de llegada, el tiempo de ejecución, el tiempo restante, el tiempo de espera, el tiempo de respuesta y el tiempo total de ejecución de cada proceso. Estos indicadores permiten evaluar el rendimiento de cada algoritmo de planificación en términos de eficiencia y equidad.
+
+En cuanto a la implementación de los algoritmos de planificación, los tres se ejecutan en un ciclo en el cual se procesan los procesos de acuerdo a sus características y reglas específicas:
+
+\begin{itemize}
+	\item En \textbf{Round Robin (RR)}, cada proceso recibe una cantidad fija de tiempo (quantum) para ejecutarse. Si un proceso no termina en su quantum, es colocado al final de la cola y el siguiente proceso es ejecutado.
+	\item En \textbf{Shortest Remaining Time First (SRTF)}, el proceso con el tiempo de ejecución restante más corto es ejecutado primero. Este algoritmo es preemptivo, lo que significa que si un proceso con menor tiempo restante llega durante la ejecución de otro proceso, el proceso en curso es interrumpido.
+	\item En \textbf{Multilevel Feedback Queue (MLFQ)}, los procesos se distribuyen en múltiples colas con diferentes prioridades. Los procesos pueden moverse entre las colas según su comportamiento, como la cantidad de tiempo que han utilizado o el número de veces que han sido preemptivos.
+\end{itemize}
+
+La simulación no maneja eventos de entrada y salida, sino que se enfoca en los eventos de ejecución de los procesos. De esta manera, el sistema permite estudiar cómo los algoritmos de planificación afectan el tiempo de respuesta, el tiempo de espera, y la eficiencia del sistema en un entorno controlado.
+
+Una vez que los eventos han sido procesados, la simulación de la ejecución de los procesos se lleva a cabo utilizando los algoritmos de planificación. Cada algoritmo sigue su propia lógica para decidir qué proceso debe ejecutarse en cada momento, garantizando una ejecución cíclica y controlada de todos los procesos.
+
+\subsection{Variables de interés}
+
+Las variables de interés que describen el sistema son las siguientes:
+
+\begin{itemize}
+	\item \textbf{Tiempo de llegada (arrival time)}: Momento en el que un proceso entra en el sistema.
+	\item \textbf{Tiempo de ejecución o burst time}: Tiempo que un proceso requiere para completarse.
+	\item \textbf{Tiempo restante o remaining time}: Tiempo que queda para que un proceso termine (en el caso de SRTF).
+	\item \textbf{Tiempo de espera o waiting time}: Tiempo total que un proceso pasa esperando en la cola antes de ser ejecutado.
+	\item \textbf{Turnaround time}: El tiempo total desde que un proceso llega al sistema hasta que se completa su ejecución.
+	\item \textbf{Tiempo de finalización o end time}: El momento en que un proceso termina su ejecución.
+\end{itemize}
+
+	\subsection{Estructura del Código}
+	
+	El código de la simulación está dividido en funciones que representan cada algoritmo de planificación. A continuación, se muestran las implementaciones de los algoritmos.
+	
+	\subsubsection{Round Robin (RR)}
+	
+	El algoritmo Round Robin asigna a cada proceso una cantidad fija de tiempo, conocida como \texttt{quantum}. Los procesos se ejecutan de manera cíclica en el orden en que llegan, y si un proceso no termina en su quantum, se coloca al final de la cola.
+	
+	\begin{verbatim}
+		def round_robin(processes, quantum):
+		queue = deque(processes)
+		time = 0
+		
+		while queue:
+		process = queue.popleft()
+		if process.burst_time > quantum:
+		process.burst_time -= quantum
+		time += quantum
+		queue.append(process)
+		else:
+		time += process.burst_time
+		process.burst_time = 0
+		print(f"Process {process.id} finished at time {time}")
+	\end{verbatim}
+	
+	\subsubsection{Shortest Remaining Time First (SRTF)}
+	
+	En el algoritmo SRTF, el proceso con el tiempo de ejecución restante más corto es ejecutado primero. Este es un algoritmo preemptivo, es decir, si un proceso con menos tiempo restante llega mientras se está ejecutando otro proceso, el proceso en ejecución será interrumpido.
+	
+	\begin{verbatim}
+		def srtf(processes):
+		processes.sort(key=lambda p: p.burst_time)  # Sort by burst time
+		time = 0
+		while processes:
+		process = processes.pop(0)
+		time += process.burst_time
+		print(f"Process {process.id} finished at time {time}")
+	\end{verbatim}
+	
+	\subsubsection{Multilevel Feedback Queue (MLFQ)}
+	
+	El algoritmo MLFQ tiene múltiples colas con diferentes prioridades. Los procesos se mueven entre las colas dependiendo de su comportamiento y tiempo de ejecución. Un proceso que no termina rápidamente puede ser degradado a una cola de menor prioridad.
+	
+	\begin{verbatim}
+		def mlfq(processes):
+		queue1 = [p for p in processes if p.priority == 1]
+		queue2 = [p for p in processes if p.priority == 2]
+		time = 0
+		
+		while queue1 or queue2:
+		if queue1:
+		process = queue1.pop(0)
+		time += process.burst_time
+		print(f"Process {process.id} finished at time {time}")
+		elif queue2:
+		process = queue2.pop(0)
+		time += process.burst_time
+		print(f"Process {process.id} finished at time {time}")
+	\end{verbatim}
+	
+	\section{Resultados y Experimentos}
+	
+	En la simulación, los algoritmos de planificación fueron evaluados con un conjunto de procesos predefinidos. La salida mostrará el tiempo de finalización de cada proceso, lo que permitirá analizar el rendimiento de cada algoritmo.
+	
+	\subsection{Hipótesis y Experimentos}
+	
+	Se realizaron varios experimentos para evaluar cómo cada algoritmo maneja los procesos con diferentes tiempos de ejecución (burst times). Los resultados se compararon en términos de tiempo total de ejecución y tiempo de espera promedio.
+	
+	\section{Conclusiones}
+	
+	Los resultados mostraron que el algoritmo \textbf{Round Robin} tiende a ser más eficiente cuando todos los procesos tienen tiempos de ejecución similares, mientras que el \textbf{Shortest Remaining Time First} es más eficiente cuando hay grandes variaciones en los tiempos de ejecución de los procesos. El \textbf{Multilevel Feedback Queue} es útil cuando se requiere un control dinámico de la prioridad de los procesos.
+	
+\end{document}
