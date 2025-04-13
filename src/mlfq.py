@@ -1,9 +1,9 @@
 import heapq
 from collections import deque
 from basic_struct import Process, Event
-from scheduling import Scheduling
+from scheduling import IScheduling
 
-class MLFQScheduler(Scheduling):
+class MLFQScheduler(IScheduling):
     def __init__(self, quantums):
         super().__init__()
         self.quantums = quantums  

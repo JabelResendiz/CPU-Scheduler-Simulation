@@ -1,126 +1,214 @@
 \documentclass[12pt]{article}
-\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{caption}
 \usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage{longtable}
+\usepackage{titlesec}
+\usepackage{fancyvrb}
+
+\definecolor{codegray}{gray}{0.95}
+\definecolor{codered}{rgb}{0.6,0,0}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codeblue}{rgb}{0,0,0.6}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{codegray},
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{codered},
+	numberstyle=\tiny\color{codeblue},
+	stringstyle=\color{codegreen},
+	basicstyle=\ttfamily\footnotesize,
+	breaklines=true,
+	numbers=left,
+	numbersep=5pt,
+	frame=single,
+	tabsize=4,
+	language=Python
+}
+
+
+\lstset{style=mystyle}
+
 
 \title{Simulación de Eventos Discretos: Algoritmos de Planificación de Procesos}
-\author{Tu Nombre}
-\date{\today}
+\author{Jabel Resendiz Aguirre}
+\date{Abril 2025}
 
 \begin{document}
 	
 	\maketitle
 	
 	\begin{abstract}
-		Este informe describe la simulación de algoritmos de planificación de procesos en un sistema de gestión de CPU, aplicando técnicas de simulación de eventos discretos. Los algoritmos implementados son el \textbf{Multilevel Feedback Queue (MLFQ)}, \textbf{Round Robin (RR)} y \textbf{Shortest Remaining Time First (SRTF)}. Se asumió que no hay eventos de entrada y salida, y que la simulación procesa todos los eventos de manera independiente antes de simular la ejecución de los procesos. 
+		
 	\end{abstract}
+\section{Introducción al Planificador de la CPU}
 
+El planificador de la CPU es una parte fundamental del sistema operativo de un sistema de computo ya que se encarga de decidir qué proceso va a utilizar la CPU en un momento determinado. 
 
-\section{Introducción}
+El trabajo del planificador es seleccionar, de entre los procesos que están esperando para ejecutarse, cuál va a ser el siguiente en utilizar la CPU. Para hacerlo, el planificador sigue un conjunto de reglas, que se conocen como algoritmos de planificación. 
 
-La simulación de sistemas de planificación de procesos es un aspecto fundamental en la ingeniería de software y la informática. Los algoritmos de planificación determinan el orden en que los procesos son ejecutados por el CPU, con el objetivo de optimizar el rendimiento y los recursos del sistema. En este proyecto, se simulan tres algoritmos de planificación:
+El planificador tiene un impacto directo en el rendimiento de la computadora. Su tarea no es sólo garantizar que todos los procesos se ejecuten, sino también hacerlo de manera que el sistema funcione de manera eficiente. Esto significa que el planificador debe minimizar el tiempo que los procesos pasan esperando y debe asegurarse de que los recursos de la CPU se utilicen de la mejor manera posible.
+
+En este proyecto de simulación, nos enfocaremos en modelar el comportamiento de un sistema de planificación de CPU utilizando eventos discretos. La idea principal es analizar cómo los algoritmos de planificación, como el Round Robin, Multilevel Feedback Queue y SRTF impactan la ejecución de los procesos en un sistema con una única CPU. Para ello, simularemos cómo los procesos llegan al sistema y cómo son asignados a la CPU para su ejecución. Utilizaremos distribuciones probabilísticas, como la distribución exponencial y de Poisson, para modelar el tiempo entre llegadas de los procesos y sus tiempos de ejecución, lo que nos permitirá simular un entorno realista donde los tiempos de llegada y duración no son constantes, sino aleatorios.
+ 
+\subsection{Características del sistema}
+Para describir adecuadamente un sistema de colas, se deben tener en cuenta las siguientes características fundamentales:
+ 
+ 
+ \begin{itemize}
+ 	\item \textbf{Patrón de llegada de los procesos:} Los procesos llegan al sistema siguiendo una distribución exponencial, lo que modela un proceso de Poisson. Esto representa un flujo aleatorio y continuo de solicitudes hacia la CPU, adecuado para entornos con alta incertidumbre en los tiempos de llegada.
+ 	
+ 	\item \textbf{Patrón de servicio del procesador:} El tiempo de CPU requerido por cada proceso se genera aleatoriamente usando distribuciones probabilísticas como la exponencial. Esto permite reflejar la variabilidad natural en la duración de las tareas reales.
+ 	
+ 	\item \textbf{Disciplina de cola:} Indica el orden en que los clientes son atendidos.En este proyecto se emplean reglas de secuenciación con prioridades, utilizando una técnica de planificación con desalojo (preemptive), en la cual el proceso que se encuentra en ejecución puede ser interrumpido para dar paso a otro de mayor prioridad dentro del sistema. Los algoritmos usados son: 
+ 	
+ 	\begin{itemize}
+ 		
+ 		\item \textbf{Round Robin (RR)}: Un algoritmo de planificación basado en asignar una cantidad fija de tiempo a cada proceso de manera cíclica.
+ 		
+ 		\item \textbf{Shortest Remaining Time First (SRTF)}: Un algoritmo de planificación preemptivo donde el proceso con el tiempo de ejecución restante más corto se ejecuta primero.
+ 		
+ 		\item \textbf{Multilevel Feedback Queue (MLFQ)}: Un algoritmo basado en múltiples colas con diferentes prioridades, donde los procesos son promovidos o degradados entre las colas según su comportamiento.
+ 		
+ 	\end{itemize}
+ 	
+ 	\item \textbf{Capacidad del sistema:} Es el número máximo de clientes que el sistema puede albergar, incluyendo los que están siendo atendidos y los que están esperando. Si la capacidad se supera, los nuevos clientes pueden ser rechazados o descartados.En nuestro sistema no estableceremos una cota para la cantidad de clientes (procesos), aunque eso no represente un escenario en sistemas embebidos o críticos donde sí hay un límite físico (RAM, threads u otros recursos propios).
+ 	 
+ 	\item \textbf{Número de canales de servicio:} Se refiere al número de servidores disponibles en paralelo. El modelo considera un sistema monoprocesador, donde existe un único canal de servicio (la CPU), encargado de ejecutar los procesos uno a uno según una disciplina de planificación preemptiva
+ 	
+ 	\item \textbf{Número de etapas de servicio:}  En nuestro caso, simulamos un sistema de planificación de CPU en el que cada proceso requiere únicamente una etapa de servicio: la ejecución en la CPU. No modelamos otras fases como entrada/salida (I/O) o espera por recursos externos . Por tanto, se trata de un sistema con una sola etapa de servicio.
+ 	
+ \end{itemize}
+	
+\subsection{Objetivo y metas}
+
+El objetivo principal de este proyecto es comprender y analizar el comportamiento de distintos algoritmos de planificación de CPU a través de una simulación estocástica de un sistema de colas. Adem\'as nos permite comparar la eficiencia de distintos algoritmos de planificación de CPU  evaluando métricas. Mediante la simulación y el análisis de estos algoritmos, buscamos entender mejor cómo las decisiones de planificación afectan el rendimiento global del sistema.
+
+\subsection{Variables de interés }
 
 \begin{itemize}
-	\item \textbf{Round Robin (RR)}: Un algoritmo de planificación basado en asignar una cantidad fija de tiempo a cada proceso de manera cíclica.
-	\item \textbf{Shortest Remaining Time First (SRTF)}: Un algoritmo de planificación preemptivo donde el proceso con el tiempo de ejecución restante más corto se ejecuta primero.
-	\item \textbf{Multilevel Feedback Queue (MLFQ)}: Un algoritmo basado en múltiples colas con diferentes prioridades, donde los procesos son promovidos o degradados entre las colas según su comportamiento.
+	\item \textbf{pid:} Identificador único para cada proceso. Se utiliza para hacer referencia y distinguir los diferentes procesos que entran al sistema.
+	\item \textbf{arrival\_time:} Es el tiempo en el que un proceso llega al sistema, determinado por una distribución de llegadas.
+	\item \textbf{burst\_time:} Tiempo de ejecución necesario para que el proceso complete su tarea. Esta variable es relevante para determinar cuánto tiempo se mantendrá el proceso ejecutándose en el CPU.
+	\item \textbf{start\_time:} Es el momento en que un proceso comienza su ejecución en el procesador. Esta variable se establece más tarde, cuando el proceso es seleccionado por el planificador.
+	\item \textbf{end\_time:} Es el tiempo cuando el proceso finaliza su ejecución. Al igual que el tiempo de inicio, este valor se calcula una vez que el proceso ha completado su tarea.
+	\item \textbf{waiting\_time:} Es el tiempo que un proceso pasa esperando antes de que comience su ejecución. Se calcula como la diferencia entre el tiempo de vuelta y el tiempo de ejecución (\texttt{waiting\_time = turnaround\_time - burst\_time}).
+	
+	\item \textbf{turnaround\_time:} Es el tiempo total que transcurre desde la llegada de un proceso hasta su finalización. Se calcula como la diferencia entre el tiempo de finalización y el tiempo de llegada (\texttt{turnaround\_time = end\_time - arrival\_time}).
+	
+	\item \textbf{remaining\_time:} Indica el tiempo restante para completar la ejecución del proceso. Esta variable es especialmente útil en algoritmos preemptivos.
+	
 \end{itemize}
 
-El sistema simulado tiene como objetivo analizar cómo cada algoritmo gestiona el tiempo de ejecución y los recursos del sistema bajo condiciones específicas. Los algoritmos de planificación se aplicarán a un conjunto de procesos predefinidos, sin eventos de entrada o salida, lo que simplifica el modelo y permite concentrarse únicamente en la ejecución y el rendimiento de los algoritmos.
+\subsection{Variables que describen el problema}
+Como bien describimos en las caracteristicas de nuestro sistema , nuestras variables que describen el problema son :
+
+\begin{itemize}
+	\item \textbf{Patrón de llegada de los procesos:} El tiempo entre la llegada de los procesos se modela utilizando una distribución \textit{exponencial}, lo cual implica un proceso de \textit{Poisson}. Esto significa que los procesos llegan de manera aleatoria, y el tiempo entre llegadas sigue una distribución exponencial con una tasa promedio de llegada.
+	
+	\item \textbf{Patrón de servicio de los procesos:} El tiempo de ejecución de cada proceso (o tiempo de ráfaga) también se modela utilizando una distribución \textit{exponencial}. Este tiempo de servicio determina cuánto tiempo cada proceso ocupará la CPU antes de completarse.
+	
+	\item \textbf{Número de procesos:} Este es el número total de procesos que el sistema debe manejar durante la simulación. Los procesos llegarán al sistema según el patrón de llegada descrito previamente.
+	
+	\item \textbf{Capacidad de la cola:} Este es el número máximo de procesos que pueden esperar en la cola de ejecución. En este proyecto no se establece una capacidad máxima para la cola, lo que permite que el sistema acepte y procese una cantidad arbitraria de procesos a lo largo de la simulación.
+	
+	\item \textbf{Número de canales de servicio:} El sistema tiene un solo canal de servicio, lo que significa que se utiliza un solo procesador de CPU para ejecutar los procesos. Este sistema se considera mono-servidor.
+	
+	\item \textbf{Disciplina de cola:} En este proyecto se implementan algoritmos de planificación de CPU como Round Robin,Multilevel Feedback Queue{MLFQ} o Shortest Remaining Time First (SRTF).
+	
+\end{itemize}
+
 
 \section{Detalles de Implementación}
 
-El sistema simulado implementa una cola de procesos, donde cada proceso tiene un tiempo de llegada, un tiempo de ejecución (burst time) y un tiempo restante de ejecución (waiting time). En lugar de simular eventos de entrada y salida, la simulación se basa en un conjunto de procesos ya definidos, y los algoritmos de planificación se aplican secuencialmente para simular la ejecución.
-
-Para la simulación de estos algoritmos, los eventos se procesan de forma independiente. Es decir, todos los procesos son analizados primero antes de comenzar con la ejecución. Una vez que se determinan los eventos y las colas de los procesos, la ejecución se simula utilizando los algoritmos mencionados.
-
-Las variables de interés en la simulación incluyen el tiempo de llegada, el tiempo de ejecución, el tiempo restante, el tiempo de espera, el tiempo de respuesta y el tiempo total de ejecución de cada proceso. Estos indicadores permiten evaluar el rendimiento de cada algoritmo de planificación en términos de eficiencia y equidad.
-
-En cuanto a la implementación de los algoritmos de planificación, los tres se ejecutan en un ciclo en el cual se procesan los procesos de acuerdo a sus características y reglas específicas:
+La simulación de planificación de procesos en CPU fue desarrollada en Python mediante un enfoque de eventos discretos. La arquitectura es modular y extensible, permitiendo simular múltiples algoritmos. A continuación se detallan los elementos principales:
 
 \begin{itemize}
-	\item En \textbf{Round Robin (RR)}, cada proceso recibe una cantidad fija de tiempo (quantum) para ejecutarse. Si un proceso no termina en su quantum, es colocado al final de la cola y el siguiente proceso es ejecutado.
-	\item En \textbf{Shortest Remaining Time First (SRTF)}, el proceso con el tiempo de ejecución restante más corto es ejecutado primero. Este algoritmo es preemptivo, lo que significa que si un proceso con menor tiempo restante llega durante la ejecución de otro proceso, el proceso en curso es interrumpido.
-	\item En \textbf{Multilevel Feedback Queue (MLFQ)}, los procesos se distribuyen en múltiples colas con diferentes prioridades. Los procesos pueden moverse entre las colas según su comportamiento, como la cantidad de tiempo que han utilizado o el número de veces que han sido preemptivos.
+	
+	\item \textbf{Estructuras principales:} Se definieron las clases \texttt{Process} y \texttt{Event} para representar procesos y eventos respectivamente.
+	
+	\begin{lstlisting}[language=Python, caption={Clase Process}]
+		class Process:
+		def __init__(self, pid, arrival, duration):
+			self.pid = pid
+			class Process:
+			def __init__(self, pid, arrival_time, burst_time):
+			self.pid = pid                      # Unique identifier for each process
+			self.arrival_time = arrival_time    # Time when the process arrives
+			self.burst_time = burst_time        # Execution time of the process
+			self.start_time = None              # Time when the process starts executing (to be set later)
+			...
+			
+	\end{lstlisting}
+	
+	\begin{lstlisting}[language=Python, caption={Clase Event}]
+		class Event:
+			def __init__(self, time, event_type, process):
+				self.time = time                    # Time when this event occurs
+				self.event_type = event_type        # Type of the event (e.g., 'arrival', 'completion')
+				self.process = process              # The process involved in the event
+		
+			def __lt__(self, other):
+				"""Defines how to compare events"""
+				return self.time < other.time
+		
+		
+	\end{lstlisting}
+	
+	\item \textbf{Interfaz para los planificadores:} Se definió una interfaz \texttt{IScheduling}, que estandariza los métodos que todo algoritmo de planificación debe implementar, como el manejo de llegadas, finalización y ejecución de procesos. Esto facilita la extensibilidad del simulador.
+	
+	\begin{lstlisting}[language=Python, caption={Interfaz IScheduling}]
+		class IScheduling(ABC):
+			@abstractmethod
+			def add_process(self, process): pass
+		
+			@abstractmethod
+			def process_event(self, event): pass
+	\end{lstlisting}
+	
+	\item \textbf{Cola de eventos:} Se utilizó una \textit{priority queue} (cola de prioridad) para almacenar eventos, ordenados por tiempo.
+	
+	\begin{lstlisting}[language=Python, caption={Cola de eventos con heapq}]
+		from heapq import heappush, heappop
+		
+		event_queue = []
+		heappush(event_queue, (event.time, event))
+		next_event = heappop(event_queue)[1]
+	\end{lstlisting}
+	
+	\item \textbf{Simulación basada en eventos:} Se procesan los eventos en orden temporal. Al procesar un evento, se actualiza el estado del sistema y se generan nuevos eventos.
+	
+	\begin{lstlisting}[language=Python, caption={Ciclo principal de simulación}]
+		while event_queue:
+			current_event = heappop(event_queue)[1]
+			handle_event(current_event)
+	\end{lstlisting}
+	
+	\item \textbf{Algoritmos de planificación:} Cada algoritmo está encapsulado en una clase que implementa una interfaz común. Se implementaron FCFS, SRTF, Round Robin y MLFQ.
+	
+	\begin{lstlisting}[language=Python, caption={Ejemplo de Round Robin}]
+		class RoundRobin(Scheduler):
+		def __init__(self, quantum):
+			self.quantum = quantum
+			self.ready_queue = deque()
+	\end{lstlisting}
+	
+	\item \textbf{Preempción:} En algoritmos como SRTF o MLFQ, se implementa lógica para interrumpir el proceso actual si uno de mayor prioridad llega.
+	
+	\item \textbf{Cálculo de métricas:} Se calcularon métricas como el tiempo promedio de espera y de retorno al finalizar todos los procesos.
+	
+	\begin{lstlisting}[language=Python, caption={Tiempo de espera promedio}]
+		average_waiting_time = sum(p.waiting_time for p in finished) / len(finished)
+	\end{lstlisting}
+	
+	\item \textbf{Pruebas y validación:} Se ejecutaron pruebas con parámetros aleatorios, distribuciones controladas y se compararon resultados entre algoritmos.
+	
 \end{itemize}
 
-La simulación no maneja eventos de entrada y salida, sino que se enfoca en los eventos de ejecución de los procesos. De esta manera, el sistema permite estudiar cómo los algoritmos de planificación afectan el tiempo de respuesta, el tiempo de espera, y la eficiencia del sistema en un entorno controlado.
-
-Una vez que los eventos han sido procesados, la simulación de la ejecución de los procesos se lleva a cabo utilizando los algoritmos de planificación. Cada algoritmo sigue su propia lógica para decidir qué proceso debe ejecutarse en cada momento, garantizando una ejecución cíclica y controlada de todos los procesos.
-
-\subsection{Variables de interés}
-
-Las variables de interés que describen el sistema son las siguientes:
-
-\begin{itemize}
-	\item \textbf{Tiempo de llegada (arrival time)}: Momento en el que un proceso entra en el sistema.
-	\item \textbf{Tiempo de ejecución o burst time}: Tiempo que un proceso requiere para completarse.
-	\item \textbf{Tiempo restante o remaining time}: Tiempo que queda para que un proceso termine (en el caso de SRTF).
-	\item \textbf{Tiempo de espera o waiting time}: Tiempo total que un proceso pasa esperando en la cola antes de ser ejecutado.
-	\item \textbf{Turnaround time}: El tiempo total desde que un proceso llega al sistema hasta que se completa su ejecución.
-	\item \textbf{Tiempo de finalización o end time}: El momento en que un proceso termina su ejecución.
-\end{itemize}
-
-	\subsection{Estructura del Código}
-	
-	El código de la simulación está dividido en funciones que representan cada algoritmo de planificación. A continuación, se muestran las implementaciones de los algoritmos.
-	
-	\subsubsection{Round Robin (RR)}
-	
-	El algoritmo Round Robin asigna a cada proceso una cantidad fija de tiempo, conocida como \texttt{quantum}. Los procesos se ejecutan de manera cíclica en el orden en que llegan, y si un proceso no termina en su quantum, se coloca al final de la cola.
-	
-	\begin{verbatim}
-		def round_robin(processes, quantum):
-		queue = deque(processes)
-		time = 0
-		
-		while queue:
-		process = queue.popleft()
-		if process.burst_time > quantum:
-		process.burst_time -= quantum
-		time += quantum
-		queue.append(process)
-		else:
-		time += process.burst_time
-		process.burst_time = 0
-		print(f"Process {process.id} finished at time {time}")
-	\end{verbatim}
-	
-	\subsubsection{Shortest Remaining Time First (SRTF)}
-	
-	En el algoritmo SRTF, el proceso con el tiempo de ejecución restante más corto es ejecutado primero. Este es un algoritmo preemptivo, es decir, si un proceso con menos tiempo restante llega mientras se está ejecutando otro proceso, el proceso en ejecución será interrumpido.
-	
-	\begin{verbatim}
-		def srtf(processes):
-		processes.sort(key=lambda p: p.burst_time)  # Sort by burst time
-		time = 0
-		while processes:
-		process = processes.pop(0)
-		time += process.burst_time
-		print(f"Process {process.id} finished at time {time}")
-	\end{verbatim}
-	
-	\subsubsection{Multilevel Feedback Queue (MLFQ)}
-	
-	El algoritmo MLFQ tiene múltiples colas con diferentes prioridades. Los procesos se mueven entre las colas dependiendo de su comportamiento y tiempo de ejecución. Un proceso que no termina rápidamente puede ser degradado a una cola de menor prioridad.
-	
-	\begin{verbatim}
-		def mlfq(processes):
-		queue1 = [p for p in processes if p.priority == 1]
-		queue2 = [p for p in processes if p.priority == 2]
-		time = 0
-		
-		while queue1 or queue2:
-		if queue1:
-		process = queue1.pop(0)
-		time += process.burst_time
-		print(f"Process {process.id} finished at time {time}")
-		elif queue2:
-		process = queue2.pop(0)
-		time += process.burst_time
-		print(f"Process {process.id} finished at time {time}")
-	\end{verbatim}
 	
 	\section{Resultados y Experimentos}
 	

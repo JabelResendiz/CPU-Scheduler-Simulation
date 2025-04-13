@@ -1,8 +1,8 @@
 import heapq
 from basic_struct import Process, Event
-from scheduling import Scheduling
+from scheduling import IScheduling
 
-class SRTF(Scheduling):
+class SRTF(IScheduling):
     def __init__(self):
         super().__init__()
         self.ready_queue = []  # Min-heap by (remaining_time, pid, process)

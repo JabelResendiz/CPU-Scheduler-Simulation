@@ -316,6 +316,11 @@ class CpuSchedulerSimulation:
                 turnaround_time.append(process.turnaround_time)
                 waiting_time.append(process.waiting_time)
 
+        return {
+            'average_turnaround_time ': np.mean(turnaround_time) if turnaround_time else 0,
+            'average_waiting_time ': np.mean(waiting_time) if waiting_time else 0
+        }
+
 # Parámetros de la simulación
 arrival_rate = 3  # Número promedio de procesos que llegan por segundo (λ)
 execution_rate = 2  # Tiempo promedio de ejecución de los procesos en segundos (μ)

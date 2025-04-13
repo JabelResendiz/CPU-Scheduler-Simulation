@@ -1,8 +1,8 @@
 import heapq
 from basic_struct import Process, Event
-from scheduling import Scheduling
+from scheduling import IScheduling
 
-class RoundRobin(Scheduling):
+class RoundRobin(IScheduling):
     def __init__(self, quantum):
         super().__init__()
         self.quantum = quantum

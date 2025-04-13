@@ -1,8 +1,8 @@
 import heapq
 from basic_struct import Process,Event
-from scheduling import Scheduling
+from scheduling import IScheduling
 
-class FCFS(Scheduling):
+class FCFS(IScheduling):
     def __init__(self):
         super().__init__()
 
