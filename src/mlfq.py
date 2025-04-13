@@ -2,6 +2,7 @@ import heapq
 from collections import deque
 from basic_struct import Process, Event
 from scheduling import IScheduling
+import numpy as np
 
 class MLFQScheduler(IScheduling):
     def __init__(self, quantums):
@@ -77,3 +78,17 @@ class MLFQScheduler(IScheduling):
 
                 heapq.heappush(self.event_queue, Event(self.current_time + time_slice, event_type, process))
                 break
+    
+
+    # def statistics(self):
+
+    #     turnaround = [p.turnaround_time for p in self.completed_processes]
+
+    #     waiting = [p.waiting_time for p in self.completed_processes]
+        
+    #     return {
+    #             'scheduler_name' : "Multilevel Feedback Queue (MLFQ)",
+    #             'avg_turnaround_time': np.mean(turnaround) if turnaround else 0,
+    #             'avg_waiting_time': np.mean(waiting) if waiting else 0,
+    #             'processes': len(self.completed_processes)
+    #            }

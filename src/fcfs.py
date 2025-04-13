@@ -1,6 +1,7 @@
 import heapq
 from basic_struct import Process,Event
 from scheduling import IScheduling
+import numpy as np
 
 class FCFS(IScheduling):
     def __init__(self):
@@ -50,3 +51,16 @@ class FCFS(IScheduling):
         process.turnaround_time = process.end_time - process.arrival_time
         self.completed_processes.append(process)        
 
+
+    # def statistics(self):
+
+    #     turnaround = [p.turnaround_time for p in self.completed_processes]
+
+    #     waiting = [p.waiting_time for p in self.completed_processes]
+
+    #     return {
+    #             'scheduler_name' : "First Come First Served (FCFS)",
+    #             'avg_turnaround_time': np.mean(turnaround) if turnaround else 0,
+    #             'avg_waiting_time': np.mean(waiting) if waiting else 0,
+    #             'processes': len(self.completed_processes)
+    #            }

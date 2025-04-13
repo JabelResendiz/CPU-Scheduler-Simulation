@@ -1,6 +1,7 @@
 import heapq
 from basic_struct import Process, Event
 from scheduling import IScheduling
+import numpy as np
 
 class RoundRobin(IScheduling):
     def __init__(self, quantum):
@@ -64,3 +65,17 @@ class RoundRobin(IScheduling):
             heapq.heappush(self.event_queue, Event(self.current_time + time_slice, 'COMPLETION', process))
         else:
             heapq.heappush(self.event_queue, Event(self.current_time + time_slice, 'TIME_SLICE_EXPIRED', process))
+
+    # def statistics(self):
+
+    #     turnaround = [p.turnaround_time for p in self.completed_processes]
+
+    #     waiting = [p.waiting_time for p in self.completed_processes]
+
+    #     return {
+    #             'scheduler_name' : "Round Robin (RR)",
+    #             'avg_turnaround_time': np.mean(turnaround) if turnaround else 0,
+    #             'avg_waiting_time': np.mean(waiting) if waiting else 0,
+    #             'processes': len(self.completed_processes)
+    #            }
+        

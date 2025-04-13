@@ -4,6 +4,8 @@ from sjf import SJF
 from roundRobin import RoundRobin
 from srtf import SRTF
 from mlfq import MLFQScheduler
+from scheduling import IScheduling
+from typing import List
 import numpy as np
 
 
@@ -24,16 +26,17 @@ class CpuSchedulerSimulation:
         # Estado de la simulación
         self.time = 0
         self.n_processes = 0
-        # self.events_queue = []  # Cola de eventos para manejar llegadas y salidas
-        # self.events = {'arrival': self.new_arrival, 'departure': self.new_departure}
 
-        # # Variables de simulación
-        # self.processes = []  # Lista para almacenar los procesos generados (con llegada y tiempo de ejecución)
-
+        # Algoritmos usados para definir mis clases aca
         self.mlfq_scheduler = MLFQScheduler(quantums=[4,8,12])
         self.round_robin_scheduler = RoundRobin(quantum = 4)
         self.srtf_scheduler = SRTF()
         self.fcfs_scheduler = FCFS()
+
+        self.schedulers: List[IScheduling] = [self.mlfq_scheduler,
+                                              self.round_robin_scheduler,
+                                              self.srtf_scheduler,
+                                              self.fcfs_scheduler]
         
     def next_arrival(self):
         return self.rng.exponential(1/self.arrival_rate)
@@ -53,23 +56,26 @@ class CpuSchedulerSimulation:
 
         return process
     
-    def schedule_next_event(self):
 
-        if self.time < self.closing_time:
-            next_arrival_time = self.time + self.next_arrival()
-    
-    def new_arrival(self):
+    def schedule_arriving(self):
 
-        process = self.create_process()
-        self.schedule_next_event()
-        self.mlfq_scheduler.add_process(process)
-        self.round_robin_scheduler.add_process(process)
-        self.srtf_scheduler.add_process(process)
+        while self.time <= self.closing_time:
+
+            next_process = self.create_process()
+
+            for scheduler in self.schedulers:
+                scheduler.add_process(next_process)
+            
+            self.time = next_process.arrival_time
+
     
     def run_event(self):
-        self.mlfq_scheduler.run()
-        self.round_robin_scheduler.run()
-        self.srtf_scheduler.run()
+        
+        self.schedule_arriving()
+
+        for scheduler in self.schedulers:
+            scheduler.run()
+        
     
 
     def statistics(self):

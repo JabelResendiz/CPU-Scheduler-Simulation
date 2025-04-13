@@ -170,42 +170,67 @@ La simulación de planificación de procesos en CPU fue desarrollada en Python m
 			def process_event(self, event): pass
 	\end{lstlisting}
 	
-	\item \textbf{Cola de eventos:} Se utilizó una \textit{priority queue} (cola de prioridad) para almacenar eventos, ordenados por tiempo.
+	\item \textbf{Cola de eventos:} Se utilizó una \textit{priority queue} (cola de prioridad) para almacenar eventos, ordenados por tiempo de llegada, es la forma que tiene el algoritmo de saber el orden en que llegan los procesos.
 	
 	\begin{lstlisting}[language=Python, caption={Cola de eventos con heapq}]
-		from heapq import heappush, heappop
+		import heapq
 		
-		event_queue = []
-		heappush(event_queue, (event.time, event))
-		next_event = heappop(event_queue)[1]
-	\end{lstlisting}
-	
-	\item \textbf{Simulación basada en eventos:} Se procesan los eventos en orden temporal. Al procesar un evento, se actualiza el estado del sistema y se generan nuevos eventos.
-	
-	\begin{lstlisting}[language=Python, caption={Ciclo principal de simulación}]
-		while event_queue:
-			current_event = heappop(event_queue)[1]
-			handle_event(current_event)
+		def add_process(self, process: Process):
+		self.processes.append(process)
+		arrival_event = Event(process.arrival_time, 'ARRIVAL', process)
+		heapq.heappush(self.event_queue, arrival_event)
+		
 	\end{lstlisting}
 	
 	\item \textbf{Algoritmos de planificación:} Cada algoritmo está encapsulado en una clase que implementa una interfaz común. Se implementaron FCFS, SRTF, Round Robin y MLFQ.
 	
 	\begin{lstlisting}[language=Python, caption={Ejemplo de Round Robin}]
-		class RoundRobin(Scheduler):
+		class RoundRobin(IScheduling):
 		def __init__(self, quantum):
+			super().__init__()
 			self.quantum = quantum
 			self.ready_queue = deque()
+			self.running_process = None  
+			
+			
 	\end{lstlisting}
 	
-	\item \textbf{Preempción:} En algoritmos como SRTF o MLFQ, se implementa lógica para interrumpir el proceso actual si uno de mayor prioridad llega.
+	\item \textbf{Preempción:} En los algoritmos como SRTF o MLFQ, se implementa lógica para interrumpir el proceso actual si uno de mayor prioridad llega. Para ellos se usan colas con prioridad para ir manteniendo la prioridad entre los procesos que ya han sido generados hasta ese momento.
 	
 	\item \textbf{Cálculo de métricas:} Se calcularon métricas como el tiempo promedio de espera y de retorno al finalizar todos los procesos.
 	
 	\begin{lstlisting}[language=Python, caption={Tiempo de espera promedio}]
-		average_waiting_time = sum(p.waiting_time for p in finished) / len(finished)
+		def statistics(self):
+			results = {}
+			for scheduler_name, scheduler in [
+				("MLFQ", self.mlfq_scheduler),
+				("RoundRobin", self.round_robin_scheduler),
+				("SRTF", self.srtf_scheduler)
+			]:
+				turnaround = [p.turnaround_time for p in scheduler.completed_processes]
+				waiting = [p.waiting_time for p in scheduler.completed_processes]
+				results[scheduler_name] = {
+						'avg_turnaround_time': np.mean(turnaround) if turnaround else 0,
+						'avg_waiting_time': np.mean(waiting) if waiting else 0,
+						'processes': len(scheduler.completed_processes)
+										}
+			return results
 	\end{lstlisting}
 	
 	\item \textbf{Pruebas y validación:} Se ejecutaron pruebas con parámetros aleatorios, distribuciones controladas y se compararon resultados entre algoritmos.
+	
+	
+\end{itemize}
+
+\subsection{Funcionamiento de mi Simulaci\'on}:
+
+\begin{itemize}
+	\item Se definen mis variables del problema utilizadas para calcular los tiempos de arribo y el tiempo que necesita la CPU para completar cada proceso. As\'i como tambi\'en se sabe el tiempo de estudio de la simulaci\'on.
+	\item Se procesan los datos de todos los procesos de mi simulaci\'on teniendo en cuenta que en nuestra definici\'on los procesos son independientes. 
+	\item Se ejecutan los algoritmos definidos previamente ,uno a la vez con la misma lista de procesos previos definidos
+	\item Se recoge y recopila informaci\'on del estado y la vida de cada proceso en un algoritmo y se muestra , listo para ser procesados
+	\item Se interpretan los datos obtenidos apoy\'andonos de gr\'aficos y tablas.
+	\item Se ejecutan pruebas con parámetros aleatorios, distribuciones controladas y se comparan resultados entre algoritmos.
 	
 \end{itemize}
 

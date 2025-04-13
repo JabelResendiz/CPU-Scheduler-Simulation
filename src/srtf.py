@@ -7,6 +7,7 @@ class SRTF(IScheduling):
         super().__init__()
         self.ready_queue = []  # Min-heap by (remaining_time, pid, process)
         self.running_process = None
+        
 
     def add_process(self, process: Process):
         arrival_event = Event(process.arrival_time, 'ARRIVAL', process)

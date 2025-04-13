@@ -29,3 +29,7 @@ class IScheduling(ABC):
     @abstractmethod
     def run(self):
         pass
+
+    # @abstractmethod
+    # def statistics(self):
+    #     pass
