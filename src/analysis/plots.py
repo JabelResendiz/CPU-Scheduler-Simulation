@@ -73,6 +73,69 @@ def plot_and_save_metrics(all_results, output_dir="./"):
     plt.close()
 
 
+def plot_algorithm_comparison12(all_results_srtf, all_results_fcfs, all_results_rr, all_results_mlfq, output_dir="./"):
+    lambda_values = []
+    srtf_waiting = []
+    fcfs_waiting = []
+    rr_waiting = []
+    mlfq_waiting = []
+    
+    srtf_ci = []
+    fcfs_ci = []
+    rr_ci = []
+    mlfq_ci = []
+
+    # Iterar sobre los resultados de los cuatro algoritmos
+    for srtf_group, fcfs_group, rr_group, mlfq_group in zip(all_results_srtf, all_results_fcfs, all_results_rr, all_results_mlfq):
+        λ = srtf_group["arrival_rate"]  # Se asume que todos los algoritmos tienen la misma tasa de llegada
+        lambda_values.append(λ)
+        
+        # SRTF
+        srtf_times = [r["avg_waiting_time"] for r in srtf_group["results"]]
+        srtf_waiting.append(np.mean(srtf_times))
+        ci = stats.t.interval(0.95, len(srtf_times)-1, loc=np.mean(srtf_times), scale=stats.sem(srtf_times))
+        srtf_ci.append((ci[1] - ci[0])/2)
+        
+        # FCFS
+        fcfs_times = [r["avg_waiting_time"] for r in fcfs_group["results"]]
+        fcfs_waiting.append(np.mean(fcfs_times))
+        ci = stats.t.interval(0.95, len(fcfs_times)-1, loc=np.mean(fcfs_times), scale=stats.sem(fcfs_times))
+        fcfs_ci.append((ci[1] - ci[0])/2)
+        
+        # Round Robin (RR)
+        rr_times = [r["avg_waiting_time"] for r in rr_group["results"]]
+        rr_waiting.append(np.mean(rr_times))
+        ci = stats.t.interval(0.95, len(rr_times)-1, loc=np.mean(rr_times), scale=stats.sem(rr_times))
+        rr_ci.append((ci[1] - ci[0])/2)
+        
+        # Multi-Level Feedback Queue (MLFQ)
+        mlfq_times = [r["avg_waiting_time"] for r in mlfq_group["results"]]
+        mlfq_waiting.append(np.mean(mlfq_times))
+        ci = stats.t.interval(0.95, len(mlfq_times)-1, loc=np.mean(mlfq_times), scale=stats.sem(mlfq_times))
+        mlfq_ci.append((ci[1] - ci[0])/2)
+
+    # Crear la figura
+    plt.figure(figsize=(12, 6))
+    
+    # Graficar los resultados de los cuatro algoritmos con sus intervalos de confianza
+    plt.errorbar(lambda_values, srtf_waiting, yerr=srtf_ci, fmt='-o', label='SRTF', capsize=5)
+    plt.errorbar(lambda_values, fcfs_waiting, yerr=fcfs_ci, fmt='-s', label='FCFS', capsize=5)
+    plt.errorbar(lambda_values, rr_waiting, yerr=rr_ci, fmt='-^', label='RR', capsize=5)
+    plt.errorbar(lambda_values, mlfq_waiting, yerr=mlfq_ci, fmt='-d', label='MLFQ', capsize=5)
+    
+    # Etiquetas y título
+    plt.xlabel('Tasa de llegada (λ)')
+    plt.ylabel('Tiempo de espera promedio')
+    plt.title('Comparación de algoritmos: Tiempo de espera vs λ')
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend()
+    
+    # Ajuste y guardar la imagen
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/comparacion_algoritmos.png", dpi=300)
+    plt.close()
+
+
 
 def plot_algorithm_comparison(all_results_srtf, all_results_fcfs, output_dir="./"):
     lambda_values = []

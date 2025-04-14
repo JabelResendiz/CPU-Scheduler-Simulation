@@ -68,14 +68,11 @@ if __name__ == "__main__":
     
     analysis.plot_and_save_metrics(data_srtf)
 
-    print(89)
-    print(data_rr)
-    analysis.plot_and_save_metrics(data_rr)
-    print(89)
-    print(data_rr)
-    analysis.plot_and_save_metrics(data_mlfq)
-    print(89)
-    analysis.plot_algorithm_comparison(data_srtf,data_fcfs)
+    # analysis.plot_and_save_metrics(data_rr)
+    
+    # analysis.plot_and_save_metrics(data_mlfq)
+    
+    analysis.plot_algorithm_comparison12(data_srtf,data_fcfs,data_rr,data_mlfq)
 
     analysis.plot_context_switches(data_srtf)
 
