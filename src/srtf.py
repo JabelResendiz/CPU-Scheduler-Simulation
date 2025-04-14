@@ -7,7 +7,8 @@ class SRTF(IScheduling):
         super().__init__()
         self.ready_queue = []  # Min-heap by (remaining_time, pid, process)
         self.running_process = None
-        
+        #self.context_switches =0 # Contador de cmabios de contextos
+        self.last_pid = None
 
     def add_process(self, process: Process):
         arrival_event = Event(process.arrival_time, 'ARRIVAL', process)
@@ -23,6 +24,10 @@ class SRTF(IScheduling):
             # Check for preemption
             if self.running_process and process.remaining_time < self.running_process.remaining_time:
                 heapq.heappush(self.ready_queue, (self.running_process.remaining_time, self.running_process.pid, self.running_process))
+                
+                self.context_switches += 1
+                self.last_pid = None  # Para que el siguiente proceso que entre sea comparado correctamente
+            
                 self.running_process = None
                 self.queue_length_log.append((self.current_time, len(self.ready_queue)))  # Log cola tras preempción
 
@@ -33,6 +38,13 @@ class SRTF(IScheduling):
             if not self.running_process:
                 if self.ready_queue:
                     _, _, proc = heapq.heappop(self.ready_queue)
+                    
+                    if self.last_pid is not None and proc.pid != self.last_pid:
+                        self.context_switches +=1
+                    
+                    self.last_pid = proc.pid
+
+                    
                     if proc.start_time is None:
                         proc.start_time = self.current_time
                     self.running_process = proc
@@ -55,6 +67,7 @@ class SRTF(IScheduling):
                 self.completed_processes.append(self.running_process)
                 self.running_process = None
                 self.queue_length_log.append((self.current_time, len(self.ready_queue)))  # Log tras finalización
+                self.last_pid = None
 
             while self.event_queue and self.event_queue[0].time <= self.current_time:
                 event = heapq.heappop(self.event_queue)
@@ -66,7 +79,7 @@ class SRTF(IScheduling):
                     heapq.heappush(self.ready_queue, (self.running_process.remaining_time, self.running_process.pid, self.running_process))
                     self.running_process = None
                     self.queue_length_log.append((self.current_time, len(self.ready_queue)))  # Log preempción
-                    
+
     def handle_arrival(self, process: Process):
         return super().handle_arrival(process)
     

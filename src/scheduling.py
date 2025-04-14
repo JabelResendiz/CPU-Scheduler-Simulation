@@ -10,6 +10,7 @@ class IScheduling(ABC):
         self.completed_processes:List[Process] = []   # List to store processes once they finish execution
         self.event_queue:List[Event] = []           # Event queue for discrete event simulation
         self.queue_length_log = []
+        self.context_switches=0
         
     @abstractmethod
     def add_process(self, process: Process):

@@ -97,7 +97,8 @@ class CpuSchedulerSimulation:
                 'waiting_times': waiting,
                 'turnaround_times': turnaround,
                 'avg_queue_size': sum(size for _,size in scheduler.queue_length_log) / len(scheduler.queue_length_log)
-                                    if len(scheduler.queue_length_log) >0  else 0
+                                    if len(scheduler.queue_length_log) >0  else 0,
+                'context_switches': scheduler.context_switches
             }
         return results
 
