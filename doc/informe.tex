@@ -45,9 +45,15 @@
 	
 	\maketitle
 	
-	\begin{abstract}
-		
-	\end{abstract}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{cpu.jfif }
+		\caption{CPU}
+		\label{fig:imagen}
+	\end{figure}
+	
+	
 \section{Introducción al Planificador de la CPU}
 
 El planificador de la CPU es una parte fundamental del sistema operativo de un sistema de computo ya que se encarga de decidir qué proceso va a utilizar la CPU en un momento determinado. 
@@ -76,6 +82,9 @@ Para describir adecuadamente un sistema de colas, se deben tener en cuenta las s
  		\item \textbf{Shortest Remaining Time First (SRTF)}: Un algoritmo de planificación preemptivo donde el proceso con el tiempo de ejecución restante más corto se ejecuta primero.
  		
  		\item \textbf{Multilevel Feedback Queue (MLFQ)}: Un algoritmo basado en múltiples colas con diferentes prioridades, donde los procesos son promovidos o degradados entre las colas según su comportamiento.
+ 		
+ 		\item \textbf{First Come First Served (FCFS)}: El m\'as sencillo de los algoritmos de planificaci\'on que simula una cola sencilla, sin preemptiva ni una prioridad destacada, los procesos son ejecutados en el orden que llegan a al cola de procesos, lo usaremos para realizar comparaciones experimentales posteriormente.
+ 		
  		
  	\end{itemize}
  	
@@ -238,11 +247,7 @@ La simulación de planificación de procesos en CPU fue desarrollada en Python m
 \end{itemize}
 
 	
-	
-	
-	
-	
-	
+	Aunque en este proyecto se implementaron y simularon cuatro algoritmos de planificación —uno sin preempción (First-Come First-Served) y tres con preempción (SRTF, Round Robin y MLFQ)—, el análisis detallado se centró exclusivamente en el comportamiento del algoritmo \texttt{SRTF}. Esta elección se debe a su relevancia teórica como algoritmo óptimo en tiempo de espera promedio y a la riqueza de fenómenos que emergen al compararlo con modelos matemáticos clásicos como el \textit{M/M/1} con prioridades dinámicas. Si bien los otros algoritmos también presentan características interesantes, su estudio escapa al alcance del presente estudio experimental.
 	
 	
 	
