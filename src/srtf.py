@@ -18,24 +18,18 @@ class SRTF(IScheduling):
         if event.event_type == 'ARRIVAL':
             process = event.process
             heapq.heappush(self.ready_queue, (process.remaining_time, process.pid, process))
+            self.queue_length_log.append((self.current_time, len(self.ready_queue)))  # Log cola tras llegada
 
             # Check for preemption
             if self.running_process and process.remaining_time < self.running_process.remaining_time:
                 heapq.heappush(self.ready_queue, (self.running_process.remaining_time, self.running_process.pid, self.running_process))
                 self.running_process = None
-
-    def handle_arrival(self, process: Process):
-        return super().handle_arrival(process)
-
-    def handle_completion(self, process: Process):
-        return super().handle_completion(process)
+                self.queue_length_log.append((self.current_time, len(self.ready_queue)))  # Log cola tras preempción
 
     def run(self):
         while self.event_queue or self.ready_queue or self.running_process:
-            # Determine next event time
             next_event_time = self.event_queue[0].time if self.event_queue else float('inf')
 
-            # If no process running
             if not self.running_process:
                 if self.ready_queue:
                     _, _, proc = heapq.heappop(self.ready_queue)
@@ -50,29 +44,37 @@ class SRTF(IScheduling):
                 else:
                     break 
 
-            # Calculate how long to run the current process
             time_slice = min(self.running_process.remaining_time, next_event_time - self.current_time)
-
-            # Run the process for the calculated time
             self.running_process.remaining_time -= time_slice
             self.current_time += time_slice
 
-            # Check if process finished
             if self.running_process.remaining_time == 0:
                 self.running_process.end_time = self.current_time
                 self.running_process.turnaround_time = self.running_process.end_time - self.running_process.arrival_time
                 self.running_process.waiting_time = self.running_process.turnaround_time - self.running_process.burst_time
                 self.completed_processes.append(self.running_process)
                 self.running_process = None
+                self.queue_length_log.append((self.current_time, len(self.ready_queue)))  # Log tras finalización
 
-            # Process any events that occurred during this time
             while self.event_queue and self.event_queue[0].time <= self.current_time:
                 event = heapq.heappop(self.event_queue)
                 self.process_event(event)
 
-            # Check for preemption
             if self.running_process and self.ready_queue:
                 next_ready = self.ready_queue[0][2]
                 if next_ready.remaining_time < self.running_process.remaining_time:
                     heapq.heappush(self.ready_queue, (self.running_process.remaining_time, self.running_process.pid, self.running_process))
                     self.running_process = None
+                    self.queue_length_log.append((self.current_time, len(self.ready_queue)))  # Log preempción
+                    
+    def handle_arrival(self, process: Process):
+        return super().handle_arrival(process)
+    
+    def handle_completion(self, process: Process):
+        return super().handle_completion(process)
+    
+    def print_results(self):
+        super().print_results("SRTF")
+        print("Queue size log (time, size):")
+        for t, s in self.queue_length_log:
+            print(f"Time {t:.2f}: Queue size = {s}")

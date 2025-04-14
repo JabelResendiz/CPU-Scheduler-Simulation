@@ -1,3 +1,4 @@
+from abc import ABCMeta
 import heapq
 from collections import deque
 from basic_struct import Process, Event
@@ -10,8 +11,16 @@ class MLFQScheduler(IScheduling):
         self.quantums = quantums  
         self.queues = [deque() for _ in quantums] + [deque()]  
         self.running_process = None
-        self.process_levels = {}  
+        self.process_levels = {} 
+        self.current_queue_level = 0
 
+    def reset(self):
+        super().reset()
+        self.queues = [deque() for _ in self.quantums] + [deque()]  
+        self.running_process = None
+        self.process_levels = {} 
+        self.current_queue_level = 0
+        
     def add_process(self, process: Process):
         self.processes.append(process)
         self.process_levels[process.pid] = 0 
@@ -79,16 +88,5 @@ class MLFQScheduler(IScheduling):
                 heapq.heappush(self.event_queue, Event(self.current_time + time_slice, event_type, process))
                 break
     
-
-    # def statistics(self):
-
-    #     turnaround = [p.turnaround_time for p in self.completed_processes]
-
-    #     waiting = [p.waiting_time for p in self.completed_processes]
-        
-    #     return {
-    #             'scheduler_name' : "Multilevel Feedback Queue (MLFQ)",
-    #             'avg_turnaround_time': np.mean(turnaround) if turnaround else 0,
-    #             'avg_waiting_time': np.mean(waiting) if waiting else 0,
-    #             'processes': len(self.completed_processes)
-    #            }
+    
+   

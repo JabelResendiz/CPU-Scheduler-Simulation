@@ -7,8 +7,7 @@ class SJF(IScheduling):
     def __init__(self):
         super().__init__()
         self.ready_queue = []
-        self.scheduler_name = "Shortest Job First (SJF)"
-
+        
     def add_process(self, process: Process):
 
         self.processes.append(process)
@@ -55,15 +54,8 @@ class SJF(IScheduling):
     def handle_completion(self, process: Process):
         self.completed_processes.append(process)
     
-    # def statistics(self):
 
-    #     turnaround = [p.turnaround_time for p in self.completed_processes]
 
-    #     waiting = [p.waiting_time for p in self.completed_processes]
-
-    #     return {
-    #             'avg_turnaround_time': np.mean(turnaround) if turnaround else 0,
-    #             'avg_waiting_time': np.mean(waiting) if waiting else 0,
-    #             'processes': len(self.completed_processes)
-    #            }
-        
+    def reset(self):
+        super().reset()
+        self.ready_queue.clear()

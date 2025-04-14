@@ -66,16 +66,8 @@ class RoundRobin(IScheduling):
         else:
             heapq.heappush(self.event_queue, Event(self.current_time + time_slice, 'TIME_SLICE_EXPIRED', process))
 
-    # def statistics(self):
-
-    #     turnaround = [p.turnaround_time for p in self.completed_processes]
-
-    #     waiting = [p.waiting_time for p in self.completed_processes]
-
-    #     return {
-    #             'scheduler_name' : "Round Robin (RR)",
-    #             'avg_turnaround_time': np.mean(turnaround) if turnaround else 0,
-    #             'avg_waiting_time': np.mean(waiting) if waiting else 0,
-    #             'processes': len(self.completed_processes)
-    #            }
-        
+    
+    def reset(self):
+        super().reset()
+        self.ready_queue.clear()
+        self.running_process = None  

@@ -9,6 +9,7 @@
 \usepackage{hyperref}
 \usepackage{titlesec}
 \usepackage{fancyvrb}
+\usepackage{float}
 
 \definecolor{codegray}{gray}{0.95}
 \definecolor{codered}{rgb}{0.6,0,0}
@@ -235,10 +236,183 @@ La simulación de planificación de procesos en CPU fue desarrollada en Python m
 \end{itemize}
 
 	
+	
+	
+	
+	
+	
+	
+	
+	
 	\section{Resultados y Experimentos}
 	
-	En la simulación, los algoritmos de planificación fueron evaluados con un conjunto de procesos predefinidos. La salida mostrará el tiempo de finalización de cada proceso, lo que permitirá analizar el rendimiento de cada algoritmo.
-	
+En esta sección, se presentan los resultados obtenidos a partir de la simulación de algoritmos de planificación de CPU, específicamente utilizando el algoritmo \texttt{SJFB}. El objetivo es evaluar el rendimiento de este algoritmo bajo diferentes condiciones de carga. Los experimentos se diseñaron con el fin de analizar cómo varían las métricas de rendimiento a medida que se cambian parámetros clave del sistema.
+
+\subsection{Configuración de los Experimentos}
+
+La simulación fue configurada con los siguientes parámetros clave:
+
+
+\begin{itemize}
+	\item \textbf{Tasa de llegada de procesos (\(\lambda\))}: Representa el número promedio de procesos que llegan al sistema por unidad de tiempo. En este caso, se evaluaron tres valores de \(\lambda\), que corresponden a diferentes niveles de carga: 0.3, 0.7 y 0.9.
+	\item \textbf{Tasa de ejecución (\(\mu\))}: Se mantuvo constante en 1.0, lo que indica que los procesos se ejecutan a una tasa fija.
+	\item \textbf{Tiempo de simulación}: Se definió un tiempo de cierre de 1000 unidades de tiempo, durante el cual se realiza el proceso de simulación.
+	\item \textbf{Número de réplicas}: Para cada configuración de parámetros, se realizaron 200 réplicas para asegurar la robustez estadística de los resultados obtenidos, esto se hace para reducir al varianza y obtener estimaciones mas confiables de las metricas de rendimiento
+\end{itemize}
+
+\subsection{Ejecución de la Simulación}
+
+La simulación se ejecutó para cada uno de los valores de \(\lambda\). Para cada réplica:
+\begin{itemize}
+	\item Se creó una nueva instancia de la simulación con el valor de \(\lambda\), manteniendo constante \(\mu\) y el tiempo de simulación.
+	\item Se ejecutaron los eventos correspondientes para modelar el comportamiento del algoritmo de planificación de CPU (\texttt{SJFB} en este caso).
+	\item Al finalizar cada ejecución, se recolectaron las estadísticas de rendimiento.
+\end{itemize}
+
+
+\subsection{Experimentos Realizados:}
+
+A continuación se describen los experimentos realizados para evaluar el efecto de la tasa de llegada de procesos (\(\lambda\)) sobre el rendimiento del sistema.
+
+\subsubsection{Efecto de la tasa de llegada (\(\lambda\)) sobre el tiempo de espera promedio}
+
+\textbf{Objetivo:} Observar cómo el tiempo de espera promedio aumenta o disminuye conforme se incrementa la tasa de llegada (\(\lambda\)).
+
+\textbf{Hipótesis:} A medida que \(\lambda\) aumenta, los procesos llegan más rápido, lo que provoca mayores tiempos de espera debido a la congestión en la cola. 
+
+\textbf{Métrica:} Tiempo de espera promedio (\texttt{avg\_waiting\_time}).
+
+\textbf{Experimento:} Para este experimento, se varió \(\lambda\) en tres niveles: 0.3, 0.7 y 0.9. Se ejecutaron 200 réplicas para cada valor de \(\lambda\), y se observó cómo el tiempo de espera promedio se comportaba para cada uno de estos niveles. Los resultados fueron graficados con \(\lambda\) en el eje \(X\) y el tiempo de espera promedio en el eje \(Y\). Adem\'as utiliza intervalos de confianza del 95\% para mostrar la incertidumbre de los resultados.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{tiempo_espera_vs_lambda.png}
+	\caption{Tiempo de espera promedio vs tasa de llegada (\(\lambda\)) con intervalo de confianza del 95\%).}
+	\label{fig:tiempo_espera_vs_lambda}
+\end{figure}
+
+El comportamiento esperado es que a medida que \(\lambda\) aumenta, el tiempo de espera promedio también aumentará debido a la mayor cantidad de procesos que llegan al sistema en menor tiempo.
+
+
+En el gráfico de arriba, se muestra cómo el tiempo de espera promedio varía a medida que cambia la tasa de llegada. La línea muestra la media de los tiempos de espera, mientras que las barras de error indican el intervalo de confianza del 95\%.
+
+Como se puede observar, el tiempo de espera promedio tiende a aumentar conforme aumenta la tasa de llegada \(\lambda\). Sin embargo, a medida que nos acercamos al valor crítico de \(\lambda \approx 1\), el crecimiento del tiempo de espera se acelera significativamente. Este comportamiento está relacionado con el concepto de \textbf{utilización del sistema} \(\rho\), que es una medida de la ocupación del CPU.
+
+Matemáticamente, la utilización del sistema se define como:
+
+\[
+\rho = \frac{\lambda}{\mu}
+\]
+
+Donde:
+- \(\lambda\) es la tasa de llegada de procesos.
+- \(\mu\) es la tasa de servicio del sistema (en este caso, la tasa a la que el CPU procesa los procesos).
+
+Cuando \(\rho\) se acerca a 1, es decir, cuando la tasa de llegada de procesos se acerca a la tasa de servicio, el sistema comienza a estar saturado, lo que genera una cola creciente de procesos esperando ser ejecutados. En términos prácticos, cuando \(\lambda\) se acerca a \(\mu\), la cola de procesos crece rápidamente, ya que el CPU está ocupado la mayor parte del tiempo, lo que incrementa el tiempo de espera de los procesos en la cola.
+
+Este fenómeno es conocido como \textit{congestión} del sistema. Matemáticamente, la fórmula que describe el tiempo de espera promedio en un sistema M/M/1 (que es el tipo de sistema que estamos simulando) es la siguiente:
+
+\[
+W_q = \frac{\lambda}{\mu(\mu - \lambda)}
+\]
+
+Donde:
+- \(W_q\) es el tiempo de espera promedio en la cola.
+- \(\lambda\) es la tasa de llegada de procesos.
+- \(\mu\) es la tasa de servicio del sistema.
+
+Esta fórmula muestra que, conforme \(\lambda\) se acerca a \(\mu\), el tiempo de espera en la cola \(W_q\) crece de manera exponencial. Esto es consistente con los resultados observados en el gráfico, donde a medida que \(\lambda\) se aproxima a 1, el tiempo de espera promedio aumenta rápidamente debido a la saturación del sistema.
+
+
+\subsubsection*{Efecto de la tasa de llegada (\(\lambda\)) sobre el tiempo de retorno promedio}
+
+\textbf{Objetivo:} Evaluar cómo la tasa de llegada de procesos impacta el tiempo total que un proceso pasa en el sistema (tiempo de retorno).
+
+\textbf{Hipótesis:} A medida que \(\lambda\) aumenta, los procesos tienden a acumularse en la cola del sistema, lo que provoca un incremento en el tiempo total desde la llegada hasta la finalización, es decir, en el tiempo de retorno.
+
+\textbf{Métrica:} Tiempo de retorno promedio (\texttt{avg\_turnaround\_time}).
+
+\textbf{Experimento:} Se varió \(\lambda\) en tres niveles: 0.3, 0.7 y 0.9, manteniendo constante la tasa de ejecución \(\mu = 1.0\). Para cada valor de \(\lambda\), se realizaron 200 réplicas, y se calculó el tiempo de retorno promedio.
+
+A continuación, se muestra el gráfico correspondiente, donde se puede observar la relación entre \(\lambda\) y el tiempo de retorno promedio, incluyendo los intervalos de confianza al 95\%:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\textwidth]{tiempo_retorno_vs_lambda.png}
+	\caption{Tiempo de retorno promedio vs tasa de llegada \(\lambda\) con IC 95\%}
+	\label{fig:turnaround_vs_lambda}
+\end{figure}
+
+\textbf{Análisis adicional:} Al aumentar \(\lambda\), el sistema se aproxima a su límite de capacidad. Esto se refleja en la razón de utilización del servidor, \(\rho = \frac{\lambda}{\mu}\). A medida que \(\rho\) se acerca a 1, la congestión crece significativamente y las colas se hacen más largas, lo que genera un crecimiento acelerado tanto en el tiempo de espera como en el tiempo de retorno. Matemáticamente, en teoría de colas M/M/1, el tiempo promedio en el sistema está dado por:
+
+\[
+\mathbb{E}[T] = \frac{1}{\mu - \lambda}
+\]
+
+lo cual muestra que, conforme \(\lambda \to \mu\), el tiempo en el sistema tiende a infinito.
+
+
+
+\subsubsection*{Efecto de la tasa de llegada (\(\lambda\)) sobre el tamaño de la cola promedio}
+
+\textbf{Objetivo:} Evaluar cómo la tasa de llegada de procesos impacta el tamaño promedio de la cola en el sistema.
+
+\textbf{Hipótesis:} A medida que \(\lambda\) aumenta, la probabilidad de que los procesos lleguen al sistema más rápidamente que la capacidad del servidor para procesarlos también aumenta, lo que provoca un incremento en el tamaño de la cola promedio.
+
+\textbf{Métrica:} Tamaño de la cola promedio (\texttt{avg\_queue\_size}).
+
+\textbf{Experimento:} Se varió \(\lambda\) en tres niveles: 0.3, 0.7 y 0.9, manteniendo constante la tasa de ejecución \(\mu = 1.0\). Para cada valor de \(\lambda\), se realizaron 200 réplicas y se calculó el tamaño promedio de la cola.
+
+A continuación, se muestra el gráfico correspondiente, donde se puede observar la relación entre \(\lambda\) y el tamaño de la cola promedio, incluyendo los intervalos de confianza al 95\%:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\textwidth]{tamano_cola_vs_lambda.png}
+	\caption{Tamaño de cola promedio vs tasa de llegada \(\lambda\) con IC 95\%}
+	\label{fig:queue_size_vs_lambda}
+\end{figure}
+
+\textbf{Análisis adicional:} A medida que \(\lambda\) aumenta, los procesos tienden a llegar más rápido de lo que el sistema puede procesarlos, lo que provoca un aumento en el tamaño de la cola. Este fenómeno se observa especialmente cuando \(\lambda\) se aproxima a \(\mu\), la tasa de servicio del servidor. En teoría de colas M/M/1, el tamaño promedio de la cola tiende a infinito conforme \(\lambda\) se acerca a \(\mu\), lo que resulta en una congestión crítica del sistema.
+
+Matemáticamente, el tamaño promedio de la cola en un sistema M/M/1 está dado por la fórmula:
+
+\[
+L_q = \frac{\lambda^2}{\mu (\mu - \lambda)}
+\]
+
+donde \(L_q\) representa el tamaño promedio de la cola. Como se puede observar en el gráfico, el aumento de \(\lambda\) incrementa el tamaño de la cola, lo cual es coherente con esta fórmula, especialmente a medida que \(\lambda \to \mu\).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	\subsection{Hipótesis y Experimentos}
 	
 	Se realizaron varios experimentos para evaluar cómo cada algoritmo maneja los procesos con diferentes tiempos de ejecución (burst times). Los resultados se compararon en términos de tiempo total de ejecución y tiempo de espera promedio.

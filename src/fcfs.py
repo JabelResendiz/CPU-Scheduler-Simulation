@@ -7,6 +7,9 @@ class FCFS(IScheduling):
     def __init__(self):
         super().__init__()
 
+    def reset(self):
+        return super().reset()
+    
     def add_process(self, process: Process):
 
         self.processes.append(process)
@@ -51,6 +54,8 @@ class FCFS(IScheduling):
         process.turnaround_time = process.end_time - process.arrival_time
         self.completed_processes.append(process)        
 
+    def print_results(self):
+        return super().print_results("First Come First Served (FCFS)")
 
     # def statistics(self):
 
